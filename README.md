@@ -18,6 +18,5 @@ Instructions:
 -  Export your footage using "combined color per-pixel"
 -  Modify and run the included FFMPEG script create_webm.sh 
 -  Upload to /files/ 
--  Modify Min & Max depths in the index.html
 -  Try it out
 

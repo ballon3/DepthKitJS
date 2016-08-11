@@ -3,47 +3,11 @@
 	DepthKit JS Demonstration :: 2015 @obviousjim http://specular.cc
 	Based on Aaronetrope by Mr Doob: http://www.aaronkoblin.com/Aaronetrope/ 
 -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
 		<title>DepthKit JS</title>
-		<style>
-			html, body {
-				height: 100%;
-			}
-
-			body {
-				background-color: #000000;
-				color: #ffffff;
-				font-family: arial, sans-serif;
-				margin: 0;
-				overflow: hidden;
-			}
-
-			#message {
-
-				width: 100%;
-				height: 100%;
-
-				display: -webkit-box;
-				display: -moz-box;
-				display: box;
-
-				-webkit-box-orient: horizontal;
-				-moz-box-orient: horizontal;
-				box-orient: horizontal;
-
-				-webkit-box-pack: center;
-				-moz-box-pack: center;
-				box-pack: center;
-
-				-webkit-box-align: center;
-				-moz-box-align: center;
-				box-align: center;
-
-				color: #ffffff;
-				text-align: center;
-
-			}
-		</style>
+		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body style="">
 		<script id="vs" type="x-shader/x-vertex">
@@ -85,26 +49,31 @@
 				return vec3( h, s, l );
 			}
 
+			// camera intrinsics from metadata file
 			uniform float mindepth;
 			uniform float maxdepth;
-
-			//TODO: make uniforms
-			const float fx = 1.11087;
-			const float fy = 0.832305;
-
-			vec3 xyz( float x, float y, float depth ) {
-				float z = depth * ( maxdepth - mindepth ) + mindepth;
-				return vec3( ( x / 640.0 ) * z * fx, ( y / 480.0 ) * z * fy, - z );
-			}
+			uniform float imageWidth;
+			uniform float imageHeight;
+			uniform float focalX;
+			uniform float focalY;
+			uniform float principleX;
+			uniform float principleY;
 
 			uniform sampler2D map;
-
 			varying float visibility;
 			varying vec2 vUv;
 
+			// projection formula
+			vec3 xyz( float x, float y, float depth ) {
+				float z = depth * ( maxdepth - mindepth ) + mindepth;
+				return vec3( (x - principleX)  * z / focalX, 
+							 (y - principleY) * z / focalY,
+							 -z );
+			}
+
 			void main() {
 
-				vUv = vec2( ( position.x + 320.0 ) / 640.0, ( position.y + 240.0 ) / 480.0 );
+				vUv = vec2 (position.x/imageWidth, position.y/imageHeight);
 				vUv.y = vUv.y * 0.5;// + 0.5;
 
 				vec3 hsl = rgb2hsl( texture2D( map, vUv ).xyz );
@@ -146,12 +115,11 @@
 		<script src="js/tween.min.js"></script>
 		<script src="js/stats.min.js"></script>
 		<script src="js/system.min.js"></script>
-
 		<script src="js/files.js"></script>
 		<script src="js/RGBDVideo.js"></script>
 		<script src="js/Main.js"></script>
-		
-		<canvas width="1744" height="1177" style="width: 1744px; height: 1229px;"></canvas>
-	
 
-</body></html>
+		<canvas width="1744" height="1177" style="width: 1744px; height: 1229px;"></canvas>
+
+	</body>
+</html>

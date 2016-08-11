@@ -1,49 +1,38 @@
 /**
  * @author mrdoob / http://mrdoob.com
- * @modified by obviousjim / http://specular.cc
+ * @modified by obviousjim & kkukshtel / simile
  */
 
 ( function () {
 
-	var video = document.createElement( 'video' );
-
-	var precision = 3;
-
-	var linesGeometry = new THREE.Geometry();
-
-	for ( var y = 240; y > - 240; y -= precision ) {
-
-		for ( var x = - 320, x2 = - 320 + precision; x < 320; x += precision, x2 += precision ) {
-
-			linesGeometry.vertices.push( new THREE.Vector3( x, y, 0 ) );
-			linesGeometry.vertices.push( new THREE.Vector3( x2, y, 0 ) );
-
-		}
-
-	}
-
+	var video          = document.createElement( 'video' );
+	var precision      = 3;
+	var linesGeometry  = new THREE.Geometry();
 	var pointsGeometry = new THREE.Geometry();
-
-	for ( var y = 240; y > - 240; y -= precision ) {
-
-		for ( var x = - 320; x < 320; x += precision ) {
-
-			pointsGeometry.vertices.push( new THREE.Vector3( x, y, 0 ) );
-
-		}
-
-	}
 
 	RGBDVideo = function ( properties ) {
 
+		var depthWidth   = properties.depthImageSize.x; 
+		var depthHeight  = properties.depthImageSize.y; 
+		var isPlaying    = false;
+		var imageTexture = THREE.ImageUtils.loadTexture( 'files/' + properties.name + '.png' );
+		var videoTexture = new THREE.Texture( video );
+
+		for ( var y = 0; y < depthHeight; y += precision ) {
+			for ( var x = 0, x2 = precision; x < depthWidth; x += precision, x2 += precision ) {
+				linesGeometry.vertices.push( new THREE.Vector3( x, y, 0 ) );
+				linesGeometry.vertices.push( new THREE.Vector3( x2, y, 0 ) );
+			}
+		}
+
+		for ( var y = 0; y < depthHeight; y += precision ) {
+			for ( var x = 0; x < depthWidth; x += precision ) {
+				pointsGeometry.vertices.push( new THREE.Vector3( x, y, 0 ) );
+			}
+		}
 
 		THREE.Object3D.call( this );
 
-		var isPlaying = false;
-
-		var imageTexture = THREE.ImageUtils.loadTexture( 'files/' + properties.name + '.png' );
-
-		var videoTexture = new THREE.Texture( video );
 		videoTexture.minFilter = THREE.LinearFilter;
 		videoTexture.magFilter = THREE.LinearFilter;
 		videoTexture.format = THREE.RGBFormat;
@@ -52,20 +41,25 @@
 		var linesMaterial = new THREE.ShaderMaterial( {
 
 			uniforms: {
-
-				"map": { type: "t", value: imageTexture },
-				"opacity": { type: "f", value: 0.25 },
-				"mindepth" : { type : "f", value : properties.mindepth },
-				"maxdepth" : { type : "f", value : properties.maxdepth }
+				"map":         { type: "t", value: imageTexture },
+				"opacity":     { type: "f", value: 0.25 },
+				"mindepth":    { type: "f", value: properties.nearClip },
+				"maxdepth":    { type: "f", value: properties.farClip },
+				"imageWidth":  { type: "f", value: properties.depthImageSize.x },
+				"imageHeight": { type: "f", value: properties.depthImageSize.y },
+				"focalX":      { type: "f", value: properties.depthFocalLength.x },
+				"focalY":      { type: "f", value: properties.depthFocalLength.y },
+				"principleX":  { type: "f", value: properties.depthPrincipalPoint.x },
+				"principleY":  { type: "f", value: properties.depthPrincipalPoint.y }
 			},
 
-			vertexShader: document.getElementById( 'vs' ).textContent,
+			vertexShader:   document.getElementById( 'vs' ).textContent,
 			fragmentShader: document.getElementById( 'fs' ).textContent,
-			blending: THREE.AdditiveBlending,
-			depthTest: false,
-			depthWrite: false,
-			wireframe: true,
-			transparent: true
+			blending:       THREE.AdditiveBlending,
+			depthTest:      false,
+			depthWrite:     false,
+			wireframe:      true,
+			transparent:    true
 
 		} );
 
@@ -77,52 +71,56 @@
 
 			uniforms: {
 
-				"map": { type: "t", value: imageTexture },
-				"opacity": { type: "f", value: 0.25 },
-				"mindepth" : { type : "f", value : properties.mindepth },
-				"maxdepth" : { type : "f", value : properties.maxdepth }
+				"map":         { type: "t", value: imageTexture },
+				"opacity":     { type: "f", value: 0.25 },
+				"mindepth":    { type: "f", value: properties.nearClip },
+				"maxdepth":    { type: "f", value: properties.farClip },
+				"imageWidth":  { type: "f", value: properties.depthImageSize.x },
+				"imageHeight": { type: "f", value: properties.depthImageSize.y },
+				"focalX":      { type: "f", value: properties.depthFocalLength.x },
+				"focalY":      { type: "f", value: properties.depthFocalLength.y },
+				"principleX":  { type: "f", value: properties.depthPrincipalPoint.x },
+				"principleY":  { type: "f", value: properties.depthPrincipalPoint.y }
 			},
 
-			vertexShader: document.getElementById( 'vs' ).textContent,
+			vertexShader:   document.getElementById( 'vs' ).textContent,
 			fragmentShader: document.getElementById( 'fs' ).textContent,
-			blending: THREE.AdditiveBlending,
-			depthTest: false,
-			depthWrite: false,
-			transparent: true
+			blending:       THREE.AdditiveBlending,
+			depthTest:      false,
+			depthWrite:     false,
+			transparent:    true
 
 		} );
 
 		this.add( new THREE.ParticleSystem( pointsGeometry, pointsMaterial ) );
 
 		// progress bar
-
 		var geometry = new THREE.Geometry();
 		geometry.vertices.push( new THREE.Vector3() );
 		geometry.vertices.push( new THREE.Vector3( 1, 0, 0 ) );
 
-		var progress = new THREE.Line( geometry, new THREE.LineBasicMaterial( { linewidth: 1, opacity: 0.75 } ) );
+		var progress        = new THREE.Line( geometry, new THREE.LineBasicMaterial( { linewidth: 1, opacity: 0.75 } ) );
 		progress.position.x = - 100;
 		progress.position.y = - 325;
-		progress.visible = false;
+		progress.visible    = false;
 		this.add( progress );
 
-		var background = new THREE.Line( geometry, new THREE.LineBasicMaterial( { linewidth: 1, opacity: 0.25 } ) );
+		var background        = new THREE.Line( geometry, new THREE.LineBasicMaterial( { linewidth: 1, opacity: 0.25 } ) );
 		background.position.x = - 100;
 		background.position.y = - 330;
-		background.scale.x = 200;
-		background.visible = false;
+		background.scale.x    = 200;
+		background.visible    = false;
 		this.add( background );
 
 
 		var material = new THREE.LineBasicMaterial( { color: 0xffffff, opacity: 0.25, transparent: true } );
 
 		// public
-
 		var interval;
 
 		this.rollover = function () {
 
-			linesMaterial.uniforms.opacity.value = 0.75;
+			linesMaterial.uniforms.opacity.value  = 0.75;
 			pointsMaterial.uniforms.opacity.value = 0.75;
 
 		};
@@ -131,7 +129,7 @@
 
 			if ( isPlaying === true ) return;
 
-			linesMaterial.uniforms.opacity.value = 0.25;
+			linesMaterial.uniforms.opacity.value  = 0.25;
 			pointsMaterial.uniforms.opacity.value = 0.25;
 
 		};
@@ -140,10 +138,10 @@
 
 			if ( isPlaying === true ) return;
 
-			progress.visible = true;
+			progress.visible   = true;
 			background.visible = true;
 
-			linesMaterial.uniforms.opacity.value = 0.75;
+			linesMaterial.uniforms.opacity.value  = 0.75;
 			pointsMaterial.uniforms.opacity.value = 0.75;
 
 			video.src = 'files/' + properties.name + '.webm';
