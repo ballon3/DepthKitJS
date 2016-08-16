@@ -1,7 +1,7 @@
 VideoFiles = 
 [
 {
-    "name" : "smokey",
+   "name" : "smokey",
    "_versionMajor" : "0",
    "_versionMinor" : "1",
    "depthFocalLength" : {
@@ -20,5 +20,4 @@ VideoFiles =
    "format" : "perpixel",
    "nearClip" : 434.166748046875
 }
-
 ]

@@ -101,13 +101,15 @@
 
 		var progress        = new THREE.Line( geometry, new THREE.LineBasicMaterial( { linewidth: 1, opacity: 0.75 } ) );
 		progress.position.x = - 100;
-		progress.position.y = - 325;
+		progress.position.y = - 300;
+		progress.position.z = - properties.nearClip + 500;
 		progress.visible    = false;
 		this.add( progress );
 
 		var background        = new THREE.Line( geometry, new THREE.LineBasicMaterial( { linewidth: 1, opacity: 0.25 } ) );
 		background.position.x = - 100;
-		background.position.y = - 330;
+		background.position.y = - 305;
+		background.position.z = - properties.nearClip + 500;	
 		background.scale.x    = 200;
 		background.visible    = false;
 		this.add( background );

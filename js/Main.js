@@ -42,17 +42,19 @@ var init = function () {
 	for ( var i = 0; i < VideoFiles.length; i++ ) {
 
 		var video = new RGBDVideo( VideoFiles[i] );
-		video.position.x = Math.sin( i * angle ) * 800;
-		video.position.z = Math.cos( i * angle ) * 800;
+		var videoOffset =  VideoFiles[i].nearClip + 300;
+		video.position.x = Math.sin( i * angle ) * videoOffset;
+		video.position.z = Math.cos( i * angle ) * videoOffset;
 		video.rotation.y = i * angle;
 
 		scene.add( video );
 		videos.push( video );
 
 		var sphere = new THREE.Mesh( geometry );
-		sphere.position.x = Math.sin( i * angle ) * 500;
-		sphere.position.y = - 100;
-		sphere.position.z = Math.cos( i * angle ) * 500;
+		var sphereOffset = Math.cos( angle/ 2 ) * (VideoFiles[i].farClip - VideoFiles[i].nearClip);		
+		sphere.position.x = Math.sin( i * angle ) * sphereOffset;
+		sphere.position.z = Math.cos( i * angle ) * sphereOffset;
+		sphere.position.y = video.position.y - 100;
 		sphere.updateMatrix();
 		sphere.updateMatrixWorld();
 
